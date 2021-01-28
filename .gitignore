@@ -28,3 +28,4 @@ air_run-*.tar
 /priv/static/
 
 .elixir_ls
+*.dump

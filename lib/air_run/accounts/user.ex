@@ -28,9 +28,7 @@ defmodule AirRun.Accounts.User do
     |> put_hashed_password
   end
 
-  @doc """
-  Puts encrypted password into the changeset
-  """
+  # Puts encrypted password into the changeset
   defp put_hashed_password(changeset) do
     case changeset do
       %Ecto.Changeset{valid?: true, changes: %{password: password}} ->

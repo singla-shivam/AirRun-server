@@ -31,16 +31,12 @@ defmodule AirRunWeb.Guardian do
     end
   end
 
-  @doc """
-  Compares passed password with the encrypted password
-  """
+  # Compares passed password with the encrypted password
   defp validate_password(password, encrypted_password) do
     Comeonin.Bcrypt.checkpw(password, encrypted_password)
   end
 
-  @doc """
-  Creates token from the user struct passed
-  """
+  # Creates token from the user struct passed
   defp create_token(user) do
     {:ok, token, _claims} = encode_and_sign(user)
     {:ok, user, token}

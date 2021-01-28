@@ -44,7 +44,8 @@ defmodule AirRun.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:guardian, "~> 2.0"},
       {:comeonin, "~> 4.0"},
-      {:bcrypt_elixir, "~> 1.0"}
+      {:bcrypt_elixir, "~> 1.0"},
+      {:health_checkup, "~> 0.1.0"}
     ]
   end
 

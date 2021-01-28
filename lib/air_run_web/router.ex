@@ -5,6 +5,8 @@ defmodule AirRunWeb.Router do
     plug :accepts, ["json"]
   end
 
+  forward "/_health", HealthCheckup, resp_body: "Ok"
+
   scope "/api", AirRunWeb do
     pipe_through :api
 

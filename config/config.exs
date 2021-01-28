@@ -26,6 +26,10 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :air_run, AirRunWeb.Guardian,
+  issuer: "air_run",
+  secret_key: "NQK1IY/k3rmq9Msv5tuAoWeut1SOUyCb6NXt7mZbaSmW8y+fIFZUMR9lDaxiLGem"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"
