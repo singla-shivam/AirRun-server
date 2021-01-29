@@ -69,3 +69,22 @@ $ docker build -t air-run:latest .
 ```bash
 $ helm install air-run-server air-run-deploy
 ```
+
+In a few seconds, the app will be ready to be used
+To call the API's run-
+```bash
+minikube ip
+```
+
+You will get the IP address of Minikube node
+Then run
+```bash
+kubectl get service
+# Example output -
+# NAME                    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+# air-run                 NodePort    10.104.233.128   <none>        80:31887/TCP   22m
+```
+
+Note the port number of the service (31887 in this case)
+
+You can call the API's by endpoint - http://\<minikube-ip\>:\<port\>/api/signup
