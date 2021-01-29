@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "air-run-deploy.fullname" . }}-test-connection"
+  labels:
+    {{- include "air-run-deploy.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "air-run-deploy.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

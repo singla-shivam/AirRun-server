@@ -39,6 +39,8 @@ USER nobody:nobody
 
 COPY --from=build --chown=nobody:nobody /app/_build/prod/rel/air_run ./
 
+COPY start.sh start.sh
+
 ENV HOME=/app
 
-CMD ["bin/air_run", "start"]
+CMD ["bash", "start.sh"]
