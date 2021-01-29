@@ -1,0 +1,140 @@
+swagger: "2.0"
+info:
+  description: ""
+  version: 0.1.0
+  title: AirRun
+  contact:
+    email: er.singla.shivam@gmail.com
+host: localhost
+basePath: /api
+tags:
+- name: Authentication
+- name: Init-deploy
+schemes:
+- https
+paths:
+  /signup:
+    post:
+      tags:
+      - Authentication
+      summary: Create new user
+      description: Creates a new user on the server. And returns a JWT token if successful
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: The credentials required to be sent in order to register
+        required: true
+        schema:
+          $ref: "#/definitions/UserCreds"
+      responses:
+        201:
+          description: User succesfully created
+          schema:
+            $ref: "#/definitions/AuthResponse"
+        400:
+          description: When some malformed input is given
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+                enum:
+                  - invalid_email
+                  - missing_email
+                  - missing_password
+                  - short_password
+        409:
+          description: When user already exists with same email id
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+                enum:
+                  - user_already_exists
+        default:
+          description: Some server error
+  /signin:
+    post:
+      tags:
+      - Authentication
+      summary: Sign-in a user
+      description: Sign in a user using email and password. And returns a JWT token if successful
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: The credentials required to be sent in order to register
+        required: true
+        schema:
+          $ref: "#/definitions/UserCreds"
+      responses:
+        200:
+          description: User succesfully signed-in
+          schema:
+            $ref: "#/definitions/AuthResponse"
+        400:
+          description: When some malformed input is given
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+                enum:
+                  - missing_email_or_pass
+        401:
+          description: Wrong password
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+                enum:
+                  - unauthorized
+        404:
+          description: Wrong password
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+                enum:
+                  - user_not_found
+        default:
+          description: Some server error
+definitions:
+  UserCreds:
+    type: object
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+        format: email
+      password:
+        type: string
+        format: password
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      email:
+        type: string
+        format: email
+  AuthResponse:
+    type: object
+    properties:
+      token:
+        type: string
+      user:
+        $ref: "#/definitions/User"

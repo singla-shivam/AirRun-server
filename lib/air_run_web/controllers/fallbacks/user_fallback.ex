@@ -36,6 +36,7 @@ defmodule AirRunWeb.Fallbacks.User do
       :invalid_email -> {:bad_request, "invalid_email"}
       :missing_email -> {:bad_request, "missing_email"}
       :missing_password -> {:bad_request, "missing_password"}
+      :short_password -> {:bad_request, "short_password"}
       _ -> {:unprocessable_entity, "unprocessable_entity"}
     end
   end
@@ -50,6 +51,7 @@ defmodule AirRunWeb.Fallbacks.User do
       %{email: ["missing_email"]} -> :missing_email
       %{email: ["missing_email"], password: ["missing_password"]} -> :missing_email
       %{password: ["missing_password"]} -> :missing_password
+      %{password: ["short_password"]} -> :short_password
       _ -> :unprocessable_entity
     end
   end

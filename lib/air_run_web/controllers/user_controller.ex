@@ -18,7 +18,7 @@ defmodule AirRunWeb.UserController do
     * "missing_password"
     * "unprocessable_entity"
   """
-  def create(conn, %{"user" => user_params}) do
+  def create(conn, user_params) do
     with {:ok, %User{} = user} <- Accounts.create_user(user_params),
          {:ok, token, _claims} <- Guardian.encode_and_sign(user) do
       conn

@@ -23,7 +23,7 @@ defmodule AirRun.Accounts.User do
     |> validate_format(:email, ~r/^[A-Za-z0-9._-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/,
       message: "invalid_email"
     )
-    |> validate_length(:password, min: 6)
+    |> validate_length(:password, min: 6, message: "short_password")
     |> unique_constraint(:email, message: "user_already_exists")
     |> put_hashed_password
   end
