@@ -14,9 +14,14 @@ defmodule AirRunWeb.FallbackController do
     |> render("error.json", changeset: changeset)
   end
 
-  # This clause is an example of how to handle resources that cannot be found.
   def call(conn, {:error, :not_found}) do
     send_resp(conn, :not_found, "")
+  end
+
+  def call(conn, {:error, :unauthorized}) do
+    conn
+    |> put_status(:unauthorized)
+    |> json(%{code: :unauthorized})
   end
 
   def call(conn, error) do

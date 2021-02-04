@@ -7,6 +7,7 @@ defmodule AirRun.Accounts do
   alias AirRun.Repo
 
   alias AirRun.Accounts.User
+  alias AirRun.Accounts.Project
 
   @doc """
   Gets a single user.
@@ -55,5 +56,15 @@ defmodule AirRun.Accounts do
       nil -> {:error, :user_not_found}
       user -> {:ok, user}
     end
+  end
+
+  def list_projects(user_id) do
+    Repo.all(Project, user_id: user_id)
+  end
+
+  def create_project(attrs \\ %{}) do
+    %Project{}
+    |> Project.changeset(attrs)
+    |> Repo.insert()
   end
 end

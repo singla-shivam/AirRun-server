@@ -5,6 +5,10 @@ defmodule AirRunWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug AirRunWeb.Auth.Pipeline
+  end
+
   forward "/_health", HealthCheckup, resp_body: "Ok"
 
   scope "/api", AirRunWeb do
@@ -12,6 +16,13 @@ defmodule AirRunWeb.Router do
 
     post "/users/signup", UserController, :create
     post "/users/signin", UserController, :signin
+  end
+
+  scope "/api", AirRunWeb do
+    pipe_through [:api, :auth]
+
+    get "/projects/list", ProjectController, :list
+    post "/projects/create", ProjectController, :create
   end
 
   # Enables LiveDashboard only for development

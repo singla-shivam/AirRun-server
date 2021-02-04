@@ -37,7 +37,7 @@ config :air_run, AirRunWeb.Endpoint,
   ],
   secret_key_base: secret_key_base
 
-config :air_run, AirRunWeb.Guardian,
+config :air_run, AirRunWeb.Auth.Guardian,
   issuer: "air_run",
   secret_key: guardian_secret_key
 

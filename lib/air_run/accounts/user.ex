@@ -3,11 +3,16 @@ defmodule AirRun.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
   alias Comeonin
+  alias AirRun.Accounts.Project
+  alias AirRun.Accounts.Deployment
 
   schema "users" do
     field :email, :string
     field :encrypted_password, :string
     field :password, :string, virtual: true
+
+    has_many :projects, Project
+    has_many :deployments, Deployment
 
     timestamps()
   end

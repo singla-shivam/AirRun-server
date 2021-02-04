@@ -37,6 +37,8 @@ defmodule AirRunWeb.Fallbacks.User do
       :missing_email -> {:bad_request, "missing_email"}
       :missing_password -> {:bad_request, "missing_password"}
       :short_password -> {:bad_request, "short_password"}
+      :project_name_already_exists -> {:conflict, "project_name_already_exists"}
+      :missing_project_name -> {:bad_request, "missing_project_name"}
       _ -> {:unprocessable_entity, "unprocessable_entity"}
     end
   end
@@ -51,6 +53,8 @@ defmodule AirRunWeb.Fallbacks.User do
       %{email: ["missing_email"], password: ["missing_password"]} -> :missing_email
       %{password: ["missing_password"]} -> :missing_password
       %{password: ["short_password"]} -> :short_password
+      %{name: ["missing_project_name"]} -> :missing_project_name
+      %{name: ["project_name_already_exists"]} -> :project_name_already_exists
       _ -> :unprocessable_entity
     end
   end

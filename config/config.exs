@@ -26,7 +26,7 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-config :air_run, AirRunWeb.Guardian,
+config :air_run, AirRunWeb.Auth.Guardian,
   issuer: "air_run",
   secret_key: "NQK1IY/k3rmq9Msv5tuAoWeut1SOUyCb6NXt7mZbaSmW8y+fIFZUMR9lDaxiLGem"
 

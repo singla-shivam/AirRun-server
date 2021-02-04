@@ -3,7 +3,7 @@ defmodule AirRunWeb.UserController do
 
   alias AirRun.Accounts
   alias AirRun.Accounts.User
-  alias AirRunWeb.Guardian
+  alias AirRunWeb.Auth.Guardian
 
   action_fallback AirRunWeb.Fallbacks.User
 

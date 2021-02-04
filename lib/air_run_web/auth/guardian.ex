@@ -1,4 +1,4 @@
-defmodule AirRunWeb.Guardian do
+defmodule AirRunWeb.Auth.Guardian do
   use Guardian, otp_app: :air_run
 
   alias AirRun.Accounts

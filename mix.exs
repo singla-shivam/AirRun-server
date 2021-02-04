@@ -45,7 +45,8 @@ defmodule AirRun.MixProject do
       {:guardian, "~> 2.0"},
       {:comeonin, "~> 4.0"},
       {:bcrypt_elixir, "~> 1.0"},
-      {:health_checkup, "~> 0.1.0"}
+      {:health_checkup, "~> 0.1.0"},
+      {:poison, "~> 3.1"}
     ]
   end
 
