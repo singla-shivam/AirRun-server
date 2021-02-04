@@ -43,7 +43,6 @@ defmodule AirRunWeb.Fallbacks.User do
 
   defp get_changeset_error(changeset) do
     errors_tuple = Utilities.translate_errors(changeset)
-    IO.inspect(errors_tuple)
 
     case errors_tuple do
       %{email: ["user_already_exists"]} -> :user_already_exists
