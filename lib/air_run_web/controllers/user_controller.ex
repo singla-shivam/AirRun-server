@@ -4,6 +4,7 @@ defmodule AirRunWeb.UserController do
   alias AirRun.Accounts
   alias AirRun.Accounts.User
   alias AirRunWeb.Auth.Guardian
+  alias AirRun.Kubernetes
 
   action_fallback AirRunWeb.Fallbacks.User
 
@@ -49,5 +50,24 @@ defmodule AirRunWeb.UserController do
     conn
     |> put_status(:bad_request)
     |> json(%{code: "missing_email_or_pass"})
+  end
+
+  def abc(conn, _) do
+    case Kubernetes.get("/api") do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        IO.puts("success")
+        IO.inspect(body)
+
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        IO.puts("Not found :(")
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        IO.inspect(reason)
+
+      _ ->
+        IO.inspect("error")
+    end
+
+    send_resp(conn, 200, "OK\n")
   end
 end

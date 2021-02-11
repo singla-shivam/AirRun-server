@@ -14,6 +14,7 @@ defmodule AirRunWeb.Router do
   scope "/api", AirRunWeb do
     pipe_through :api
 
+    get "/abc", UserController, :abc
     post "/users/signup", UserController, :create
     post "/users/signin", UserController, :signin
   end
