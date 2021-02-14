@@ -87,4 +87,8 @@ kubectl get service
 
 Note the port number of the service (31887 in this case)
 
-You can call the API's by endpoint - http://\<minikube-ip\>:\<port\>/api/signup
+You can call the API's by endpoint - http://\<minikube-ip\>:\<port\>/_health
+
+### Create private docker registry
+Ref - https://www.linuxtechi.com/setup-private-docker-registry-kubernetes/
+
