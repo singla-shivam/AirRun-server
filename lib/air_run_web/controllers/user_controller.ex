@@ -67,6 +67,7 @@ defmodule AirRunWeb.UserController do
       _ ->
         IO.inspect("error")
     end
+    Kubernetes.make_deployment()
 
     send_resp(conn, 200, "OK\n")
   end

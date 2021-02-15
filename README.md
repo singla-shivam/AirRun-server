@@ -92,3 +92,31 @@ You can call the API's by endpoint - http://\<minikube-ip\>:\<port\>/_health
 ### Create private docker registry
 Ref - https://www.linuxtechi.com/setup-private-docker-registry-kubernetes/
 
+After following above steps
+* Create htpassword file
+```bash
+htpasswd -Bbn <user-name> <password>
+```
+Copy the output generated and save it in `pass-file` of the node in `/opt/certs/pass-file` directory.
+
+Now login with docker
+```bash
+docker login k8s-registry:31320
+```
+
+On your local machine, create a secret to be used by Kaniko while pushing to the repo
+```bash
+kubectl create secret generic kaniko-secret --from-file=~/.docker/config.json
+```
+
+Create another secret to be used as image pull secrete
+```bash
+kubectl create secret generic regcred \
+    --from-file=.dockerconfigjson=~/.docker/config.json \
+    --type=kubernetes.io/dockerconfigjson
+```
+
+Now deploy the private registry-
+```bash
+kubectl apply -f priv/private-registry.yaml
+```

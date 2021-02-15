@@ -18,7 +18,10 @@ kind: Deployment
 metadata:
   name: hello-python
 spec:
-  replicas: 4
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-python
   template:
     metadata:
       labels:
@@ -26,7 +29,7 @@ spec:
     spec:
       containers:
       - name: hello-python
-        image: hello-python:latest
-        imagePullPolicy: Never
+        image: k8s-registry:31320/test-kaniko3:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5000

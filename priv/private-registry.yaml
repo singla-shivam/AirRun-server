@@ -33,6 +33,12 @@ spec:
             value: "/certs/registry.crt"
           - name: REGISTRY_HTTP_TLS_KEY
             value: "/certs/registry.key"
+          - name: REGISTRY_AUTH
+            value: "htpasswd"
+          - name: REGISTRY_AUTH_HTPASSWD_REALM
+            value: "Registry Realm"
+          - name: REGISTRY_AUTH_HTPASSWD_PATH
+            value: "/certs/pass-file"
           ports:
             - containerPort: 5000
           volumeMounts:
@@ -50,7 +56,7 @@ metadata:
   name: k8s-registry
 spec:
   ports:
-  - port: 5000
+  - port: 80
     nodePort: 31320
     protocol: TCP
     targetPort: 5000

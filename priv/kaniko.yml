@@ -1,32 +1,41 @@
-apiVersion: v1
-kind: Pod
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: kaniko
 spec:
-  containers:
-  - name: kaniko
-    image: gcr.io/kaniko-project/executor:latest
-    args: ["--dockerfile=/workspace/dockerfile",
-            "--context=dir://workspace",
-            "--destination=k8s-registry:5000/test-kaniko3",
-            "--registry-mirror=k8s-registry:5000",
-            "--skip-tls-verify=true",
-            "--registry-certificate=k8s-registry=/certs/registry.crt"]
+  backoffLimit: 1
+  template:
+    spec:
+      containers:
+      - name: kaniko
+        image: gcr.io/kaniko-project/executor:latest
+        args: ["--dockerfile=/workspace/dockerfile",
+                "--context=dir://workspace",
+                "--destination=k8s-registry:80/test-kaniko4",
+                "--registry-mirror=k8s-registry:80",
+                "--skip-tls-verify=true",
+                "--registry-certificate=k8s-registry=/certs/registry.crt"]
 
-    volumeMounts:
-      - name: dockerfile-storage
-        mountPath: /workspace
-      - name: certs-vol
-        mountPath: /certs
-  restartPolicy: Never
-  volumes:
-    - name: dockerfile-storage
-      persistentVolumeClaim:
-        claimName: dockerfile-claim
-    - name: certs-vol
-      hostPath:
-        path: /opt/certs
-        type: Directory
+        volumeMounts:
+          - name: dockerfile-storage
+            mountPath: /workspace
+          - name: certs-vol
+            mountPath: /certs
+          - name: kaniko-secret-volume
+            mountPath: /kaniko/.docker
+            readOnly: true
+      restartPolicy: Never
+      volumes:
+        - name: dockerfile-storage
+          persistentVolumeClaim:
+            claimName: dockerfile-claim
+        - name: certs-vol
+          hostPath:
+            path: /opt/certs
+            type: Directory
+        - name: kaniko-secret-volume
+          secret:
+            secretName: kaniko-secret
 
 ---
 apiVersion: v1
