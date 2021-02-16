@@ -41,14 +41,16 @@ spec:
             httpGet:
               path: /_health
               port: http
+            initialDelaySeconds: 20
           readinessProbe:
             httpGet:
               path: /_health
               port: http
+            initialDelaySeconds: 20
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - mountPath: "/app/data"
+            - mountPath: "/app/uploads"
               name: {{ include "air-run-deploy.persistentVolumeStorageName" . }}
           env:          
             - name: "DATABASE_URL"

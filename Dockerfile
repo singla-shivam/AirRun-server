@@ -41,6 +41,9 @@ COPY --from=build --chown=nobody:nobody /app/_build/prod/rel/air_run ./
 
 COPY start.sh start.sh
 
+# TODO change this to something better
+COPY priv priv
+
 ENV HOME=/app
 
 CMD ["bash", "start.sh"]

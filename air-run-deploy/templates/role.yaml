@@ -8,3 +8,6 @@ rules:
 - apiGroups: ["apps"]
   resources: ["deployments"]
   verbs: ["get", "create"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get", "create"]

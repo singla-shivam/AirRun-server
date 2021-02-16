@@ -9,59 +9,30 @@ spec:
       containers:
       - name: kaniko
         image: gcr.io/kaniko-project/executor:latest
-        args: ["--dockerfile=/workspace/dockerfile",
-                "--context=dir://workspace",
-                "--destination=k8s-registry:80/test-kaniko4",
+        args: ["--dockerfile=/workspace/Dockerfile",
+                "--context=dir://context-dir",
+                "--destination=k8s-registry:80/image-name",
                 "--registry-mirror=k8s-registry:80",
                 "--skip-tls-verify=true",
                 "--registry-certificate=k8s-registry=/certs/registry.crt"]
 
         volumeMounts:
-          - name: dockerfile-storage
+          - name: workspace-storage
             mountPath: /workspace
           - name: certs-vol
             mountPath: /certs
-          - name: kaniko-secret-volume
+          - name: kaniko-secret-vol
             mountPath: /kaniko/.docker
             readOnly: true
       restartPolicy: Never
       volumes:
-        - name: dockerfile-storage
-          persistentVolumeClaim:
-            claimName: dockerfile-claim
         - name: certs-vol
           hostPath:
             path: /opt/certs
             type: Directory
-        - name: kaniko-secret-volume
+        - name: kaniko-secret-vol
           secret:
             secretName: kaniko-secret
-
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: dockerfile
-  labels:
-    type: local
-spec:
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: local-storage
-  hostPath:
-    path: "/home/docker/kaniko"
-
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: dockerfile-claim
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 8Gi
-  storageClassName: local-storage
+        - name: "workspace-storage"
+          persistentVolumeClaim:
+            claimName: air-run-pv-claim

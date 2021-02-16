@@ -1,5 +1,5 @@
 defmodule AirRun.Accounts.Project do
-  @derive {Jason.Encoder, only: [:name, :user_id]}
+  @derive {Jason.Encoder, only: [:name, :user_id, :id, :prog_lang]}
   use Ecto.Schema
   import Ecto.Changeset
   alias AirRun.Accounts.User
@@ -7,6 +7,7 @@ defmodule AirRun.Accounts.Project do
   schema "projects" do
     field :name, :string
     field :user_id, :integer
+    field :prog_lang, :string
 
     timestamps()
   end

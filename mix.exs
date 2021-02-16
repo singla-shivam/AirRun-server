@@ -47,7 +47,8 @@ defmodule AirRun.MixProject do
       {:bcrypt_elixir, "~> 1.0"},
       {:health_checkup, "~> 0.1.0"},
       {:poison, "~> 3.1"},
-      {:httpoison, "~> 1.8"}
+      {:httpoison, "~> 1.8"},
+      {:yaml_elixir, "~> 2.4"},
     ]
   end
 

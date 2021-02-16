@@ -29,3 +29,5 @@ air_run-*.tar
 
 .elixir_ls
 *.dump
+
+uploads

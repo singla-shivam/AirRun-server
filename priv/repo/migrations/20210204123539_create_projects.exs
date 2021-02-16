@@ -5,6 +5,7 @@ defmodule AirRun.Repo.Migrations.CreateProjects do
     create table(:projects) do
       add :name, :string
       add :user_id, references("users")
+      add :prog_lang, :string, default: "python:0.1"
 
       timestamps()
     end

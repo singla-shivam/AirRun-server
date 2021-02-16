@@ -8,6 +8,7 @@ defmodule AirRun.Accounts do
 
   alias AirRun.Accounts.User
   alias AirRun.Accounts.Project
+  alias AirRun.Accounts.Deployment
 
   @doc """
   Gets a single user.
@@ -58,6 +59,10 @@ defmodule AirRun.Accounts do
     end
   end
 
+  def get_project_by_id(project_id) do
+    Repo.get(Project, project_id)
+  end
+
   def list_projects(user_id) do
     Repo.all(Project, user_id: user_id)
   end
@@ -65,6 +70,21 @@ defmodule AirRun.Accounts do
   def create_project(attrs \\ %{}) do
     %Project{}
     |> Project.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def list_deployments(user_id) do
+    Repo.all(Deployment, user_id: user_id)
+  end
+
+  def create_deployment(attrs \\ %{}) do
+    %Deployment{}
+    |> Deployment.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def create_dummy_deployment() do
+    %Deployment{}
     |> Repo.insert()
   end
 end

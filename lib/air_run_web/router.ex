@@ -24,6 +24,9 @@ defmodule AirRunWeb.Router do
 
     get "/projects/list", ProjectController, :list
     post "/projects/create", ProjectController, :create
+
+    get "/deployments/list", DeploymentController, :list
+    post "/deployments/create", DeploymentController, :create
   end
 
   # Enables LiveDashboard only for development

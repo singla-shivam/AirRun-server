@@ -1,4 +1,5 @@
 defmodule AirRun.Accounts.Deployment do
+  @derive {Jason.Encoder, only: [:id]}
   use Ecto.Schema
   alias AirRun.Accounts.User
 
