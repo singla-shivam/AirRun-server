@@ -21,7 +21,11 @@ serviceAccount:
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name: "air-run"
+  name: "air-run-sa"
+
+persistentVolume:
+  storage: 10Gi
+  storageClassName: "manual"
 
 podAnnotations: {}
 
@@ -41,6 +45,7 @@ securityContext:
 service:
   type: NodePort
   port: 80
+  nodePort: 31330
 
 ingress:
   enabled: false

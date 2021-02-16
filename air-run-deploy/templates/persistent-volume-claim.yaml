@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "air-run-deploy.persistentVolumeClaimName" . }}
+  labels:
+    {{- include "air-run-deploy.labels" . | nindent 4 }}
+spec:
+  storageClassName: {{ .Values.persistentVolume.storageClassName }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

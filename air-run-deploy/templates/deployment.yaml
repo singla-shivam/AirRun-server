@@ -47,22 +47,29 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: "/app/data"
+              name: {{ include "air-run-deploy.persistentVolumeStorageName" . }}
           env:          
-          - name: "DATABASE_URL"
-            valueFrom:
-              secretKeyRef:
-                key: DATABASE_URL
-                name: {{ include "air-run-deploy.fullname" . }}
-          - name: "SECRET_KEY_BASE"
-            valueFrom:
-              secretKeyRef:
-                key: SECRET_KEY_BASE
-                name: {{ include "air-run-deploy.fullname" . }}
-          - name: "GUARDIAN_SECRET_KEY"
-            valueFrom:
-              secretKeyRef:
-                key: GUARDIAN_SECRET_KEY
-                name: {{ include "air-run-deploy.fullname" . }}
+            - name: "DATABASE_URL"
+              valueFrom:
+                secretKeyRef:
+                  key: DATABASE_URL
+                  name: {{ include "air-run-deploy.fullname" . }}
+            - name: "SECRET_KEY_BASE"
+              valueFrom:
+                secretKeyRef:
+                  key: SECRET_KEY_BASE
+                  name: {{ include "air-run-deploy.fullname" . }}
+            - name: "GUARDIAN_SECRET_KEY"
+              valueFrom:
+                secretKeyRef:
+                  key: GUARDIAN_SECRET_KEY
+                  name: {{ include "air-run-deploy.fullname" . }}
+      volumes:
+        - name: {{ include "air-run-deploy.persistentVolumeStorageName" . }}
+          persistentVolumeClaim:
+            claimName: {{ include "air-run-deploy.persistentVolumeClaimName" . }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
