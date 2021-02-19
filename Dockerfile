@@ -18,7 +18,7 @@ COPY mix.exs mix.lock ./
 COPY config config
 RUN mix do deps.get, deps.compile
 
-COPY priv priv
+COPY priv/repo priv/repo
 # RUN mix phx.digest
 
 # compile and build release

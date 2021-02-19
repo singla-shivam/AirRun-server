@@ -99,6 +99,11 @@ htpasswd -Bbn <user-name> <password>
 ```
 Copy the output generated and save it in `pass-file` of the node in `/opt/certs/pass-file` directory.
 
+Now deploy the private registry-
+```bash
+kubectl apply -f priv/private-registry.yaml
+```
+
 Now login with docker
 ```bash
 docker login k8s-registry:31320
@@ -114,9 +119,4 @@ Create another secret to be used as image pull secrete
 kubectl create secret generic regcred \
     --from-file=.dockerconfigjson=~/.docker/config.json \
     --type=kubernetes.io/dockerconfigjson
-```
-
-Now deploy the private registry-
-```bash
-kubectl apply -f priv/private-registry.yaml
 ```

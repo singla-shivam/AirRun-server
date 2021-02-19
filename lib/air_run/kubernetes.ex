@@ -65,16 +65,22 @@ defmodule AirRun.Kubernetes do
 
     job_name = "#{project_name}-#{deployment_id}-build"
     image_name = "#{project_name}-image:#{deployment_id}"
+
+    # change job name
     kaniko_config = put_in(kaniko_config, ["metadata", "name"], job_name)
+
+    # path in config for container
     kaniko_containers_path = ["spec", "template", "spec", "containers"]
-    kaniko_args_path = kaniko_containers_path ++ [get_in_index(0), "args"]
+    kaniko_build_args_path = kaniko_containers_path ++ [get_in_index(0), "args"]
+    kaniko_poll_args_path = kaniko_containers_path ++ [get_in_index(1), "args"]
 
-    containers = get_in(kaniko_config, kaniko_containers_path)
-    kaniko_args = get_in(kaniko_config, kaniko_args_path)
+    kaniko_containrs = get_in(kaniko_config, kaniko_containers_path)
+    kaniko_build_args = get_in(kaniko_config, kaniko_build_args_path)
+    kaniko_poll_args = get_in(kaniko_config, kaniko_poll_args_path)
 
-    kaniko_args =
+    kaniko_build_args =
       Enum.map(
-        kaniko_args,
+        kaniko_build_args,
         fn arg ->
           arg
           |> String.replace("Dockerfile", project_path <> "/Dockerfile")
@@ -83,13 +89,25 @@ defmodule AirRun.Kubernetes do
         end
       )
 
-    containers = [%{List.first(containers) | "args" => kaniko_args}]
+    kaniko_poll_args =
+      Enum.map(
+        kaniko_poll_args,
+        fn arg ->
+          arg
+          |> String.replace("job-name-here", job_name)
+        end
+      )
+
+    kaniko_build_container = %{Enum.at(kaniko_containrs, 0) | "args" => kaniko_build_args}
+    kaniko_poll_container = %{Enum.at(kaniko_containrs, 1) | "args" => kaniko_poll_args}
+
+    kaniko_containrs = [kaniko_build_container, kaniko_poll_container]
 
     kaniko_config =
       put_in(
         kaniko_config,
         kaniko_containers_path,
-        containers
+        kaniko_containrs
       )
 
     IO.inspect(kaniko_config)

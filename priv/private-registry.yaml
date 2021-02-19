@@ -15,14 +15,14 @@ spec:
         app: k8s-registry
     spec:
       volumes:
-      - name: certs-vol
-        hostPath:
-          path: /opt/certs
-          type: Directory
-      - name: registry-vol
-        hostPath:
-          path: /opt/registry
-          type: Directory
+        - name: certs-vol
+          hostPath:
+            path: /opt/certs
+            type: Directory
+        - name: registry-vol
+          hostPath:
+            path: /opt/registry
+            type: Directory
 
       containers:
         - image: registry:2

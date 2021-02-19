@@ -46,4 +46,16 @@ defmodule AirRunWeb.DeploymentController do
       send_resp(conn, 400, "No file provided")
     end
   end
+
+  def callback(conn, params) do
+    body = params
+
+    if body["_json"] != nil do
+      body = Poison.decode!(body["_json"])
+    end
+
+    IO.inspect(body)
+
+    send_resp(conn, 202, "")
+  end
 end

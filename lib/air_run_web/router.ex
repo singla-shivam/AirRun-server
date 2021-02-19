@@ -17,6 +17,7 @@ defmodule AirRunWeb.Router do
     get "/abc", UserController, :abc
     post "/users/signup", UserController, :create
     post "/users/signin", UserController, :signin
+    post "/deployments/test", DeploymentController, :test
   end
 
   scope "/api", AirRunWeb do

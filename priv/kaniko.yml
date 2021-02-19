@@ -6,24 +6,65 @@ spec:
   backoffLimit: 1
   template:
     spec:
+      serviceAccountName: air-run-sa
       containers:
-      - name: kaniko
-        image: gcr.io/kaniko-project/executor:latest
-        args: ["--dockerfile=/workspace/Dockerfile",
-                "--context=dir://context-dir",
-                "--destination=k8s-registry:80/image-name",
-                "--registry-mirror=k8s-registry:80",
-                "--skip-tls-verify=true",
-                "--registry-certificate=k8s-registry=/certs/registry.crt"]
-
-        volumeMounts:
-          - name: workspace-storage
-            mountPath: /workspace
-          - name: certs-vol
-            mountPath: /certs
-          - name: kaniko-secret-vol
-            mountPath: /kaniko/.docker
-            readOnly: true
+        - name: kaniko-build
+          image: gcr.io/kaniko-project/executor:latest
+          imagePullPolicy: IfNotPresent
+          args: ["--dockerfile=/workspace/Dockerfile",
+                  "--context=dir://context-dir",
+                  "--destination=k8s-registry:80/image-name",
+                  "--registry-mirror=k8s-registry:80",
+                  "--skip-tls-verify=true",
+                  "--registry-certificate=k8s-registry=/certs/registry.crt"]
+          lifecycle:
+            preStop:
+              httpGet:
+                host: air-run # air-run server service name (domain name)
+                path: /api/hook
+                port: 80
+          volumeMounts:
+            - name: workspace-storage
+              mountPath: /workspace
+            - name: certs-vol
+              mountPath: /certs
+            - name: kaniko-secret-vol
+              mountPath: /kaniko/.docker
+              readOnly: true
+        - name: kaniko-poll
+          image: alpine:3.9
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh"]
+          args:
+            - -c
+            - >-
+              apk add curl jq;
+              sleep 1;
+              while true;
+              do
+              sleep 5;
+              container_state=$(curl
+              --header "Accept: application/json" 
+              --header "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
+              --request GET
+              --cert-type DER
+              --cacert "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+              https://kubernetes.default.svc/api/v1/namespaces/default/pods/?labelSelector=job-name=job-name-here
+              | jq '.items'
+              | jq '.[0].status.containerStatuses'
+              | jq '.[] | select(.name == "kaniko-build")'
+              | jq '.state');
+              echo $container_state;
+              running_type=$(echo $container_state | jq '.running' | jq 'type');
+              if [[ $running_type != "\"null\"" ]]; then continue; fi;
+              curl
+              --header "Content-Type:application/json"
+              --request POST
+              --data $(echo $container_state | jq "tostring")
+              http://air-run/api/deployments/test;
+              break;
+              done;
+              echo "Done"
       restartPolicy: Never
       volumes:
         - name: certs-vol
