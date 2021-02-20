@@ -9,6 +9,10 @@ defmodule AirRunWeb.Router do
     plug AirRunWeb.Auth.Pipeline
   end
 
+  pipeline :auth_service_account do
+    plug AirRunWeb.Auth.Plug.ServiceAccount
+  end
+
   forward "/_health", HealthCheckup, resp_body: "Ok"
 
   scope "/api", AirRunWeb do
@@ -17,7 +21,6 @@ defmodule AirRunWeb.Router do
     get "/abc", UserController, :abc
     post "/users/signup", UserController, :create
     post "/users/signin", UserController, :signin
-    post "/deployments/test", DeploymentController, :test
   end
 
   scope "/api", AirRunWeb do
@@ -28,6 +31,12 @@ defmodule AirRunWeb.Router do
 
     get "/deployments/list", DeploymentController, :list
     post "/deployments/create", DeploymentController, :create
+  end
+
+  scope "/api", AirRunWeb do
+    pipe_through :auth_service_account
+
+    post "/deployments/build-callback", DeploymentController, :build_callback
   end
 
   # Enables LiveDashboard only for development

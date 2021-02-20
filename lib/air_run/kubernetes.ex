@@ -110,14 +110,11 @@ defmodule AirRun.Kubernetes do
         kaniko_containrs
       )
 
-    IO.inspect(kaniko_config)
-
     headers = [{"Content-type", "application/json"}]
 
     case post("/apis/batch/v1/namespaces/default/jobs", Poison.encode!(kaniko_config), headers) do
       {:ok, %HTTPoison.Response{status_code: 201, body: body}} ->
         IO.puts("created")
-        IO.inspect(body)
 
       {:ok, %HTTPoison.Response{status_code: 404}} ->
         IO.puts("Not found :(")

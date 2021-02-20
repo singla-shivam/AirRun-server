@@ -17,7 +17,7 @@ defmodule AirRunWeb.DeploymentController do
   def create(conn, params) do
     project_id = params["project_id"]
     user = Guardian.Plug.current_resource(conn)
-    {:ok, deployment} = Accounts.create_dummy_deployment()
+    {:ok, deployment} = Accounts.create_deployment(user.id, project_id)
     project = Accounts.get_project_by_id(project_id)
 
     if file = params["file"] do
@@ -47,12 +47,9 @@ defmodule AirRunWeb.DeploymentController do
     end
   end
 
-  def callback(conn, params) do
+  def build_callback(conn, params) do
     body = params
-
-    if body["_json"] != nil do
-      body = Poison.decode!(body["_json"])
-    end
+    body = if body["_json"] != nil, do: Poison.decode!(body["_json"])
 
     IO.inspect(body)
 

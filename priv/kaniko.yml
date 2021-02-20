@@ -39,10 +39,12 @@ spec:
             - -c
             - >-
               apk add curl jq;
-              sleep 1;
+              sleep 10;
+
               while true;
               do
               sleep 5;
+
               container_state=$(curl
               --header "Accept: application/json" 
               --header "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
@@ -54,17 +56,33 @@ spec:
               | jq '.[0].status.containerStatuses'
               | jq '.[] | select(.name == "kaniko-build")'
               | jq '.state');
-              echo $container_state;
+    
+              echo "$container_state";
               running_type=$(echo $container_state | jq '.running' | jq 'type');
               if [[ $running_type != "\"null\"" ]]; then continue; fi;
+
+              data=$(echo "$container_state" | jq '{status: ., "job-name": "job-name-here"}');
               curl
               --header "Content-Type:application/json"
               --request POST
-              --data $(echo $container_state | jq "tostring")
-              http://air-run/api/deployments/test;
+              --user "$(echo $SERVICE_ACCOUNT_USERNAME):$(echo $SERVICE_ACCOUNT_PASSWORD)"
+              --data $(echo "$data" | jq "tostring")
+              http://air-run/api/deployments/build-callback;
+
               break;
               done;
               echo "Done"
+          env:
+            - name: "SERVICE_ACCOUNT_USERNAME"
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: air-run-service-account-basic-auth
+            - name: "SERVICE_ACCOUNT_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: air-run-service-account-basic-auth
       restartPolicy: Never
       volumes:
         - name: certs-vol

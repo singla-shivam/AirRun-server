@@ -13,7 +13,6 @@ defmodule AirRunWeb.Auth.Guardian do
   def resource_from_claims(claims) do
     id = claims["sub"]
     resource = Accounts.get_user!(id)
-    IO.inspect(resource)
     {:ok, resource}
   end
 

@@ -68,6 +68,16 @@ spec:
                 secretKeyRef:
                   key: GUARDIAN_SECRET_KEY
                   name: {{ include "air-run-deploy.fullname" . }}
+            - name: "SERVICE_ACCOUNT_USERNAME"
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: air-run-service-account-basic-auth
+            - name: "SERVICE_ACCOUNT_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: air-run-service-account-basic-auth
       volumes:
         - name: {{ include "air-run-deploy.persistentVolumeStorageName" . }}
           persistentVolumeClaim:

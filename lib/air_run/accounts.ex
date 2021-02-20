@@ -77,14 +77,9 @@ defmodule AirRun.Accounts do
     Repo.all(Deployment, user_id: user_id)
   end
 
-  def create_deployment(attrs \\ %{}) do
+  def create_deployment(user_id, project_id) do
     %Deployment{}
-    |> Deployment.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  def create_dummy_deployment() do
-    %Deployment{}
+    |> Deployment.changeset(%{"user_id" => user_id, "project_id" => project_id})
     |> Repo.insert()
   end
 end

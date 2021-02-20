@@ -55,3 +55,6 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+System.put_env("SERVICE_ACCOUNT_USERNAME", "service-account")
+System.put_env("SERVICE_ACCOUNT_PASSWORD", "service-account-pass")

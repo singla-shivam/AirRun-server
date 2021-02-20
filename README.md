@@ -60,6 +60,18 @@ data:
   SECRET_KEY_BASE: VGI4VzVXTExTb2x1V2o5Y2pwL1hzOUdGM1lncGNVYWNhTG1mNGcrMW84NG5GTXNQKy9lRjlFb2t3Ry8rQ1pEVwo=
 ```
 
+* Create another secret for calling air-run server-API from within the cluster. Replace the username and password.
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: air-run-service-account-basic-auth
+type: kubernetes.io/basic-auth
+stringData:
+  username: admin
+  password: t0p-Secret
+```
+
 * Build docker image in the context of Minikube
 ```bash
 $ docker build -t air-run:latest .
