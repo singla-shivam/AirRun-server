@@ -16,18 +16,16 @@ spec:
                   "--destination=k8s-registry:80/image-name",
                   "--registry-mirror=k8s-registry:80",
                   "--skip-tls-verify=true",
-                  "--registry-certificate=k8s-registry=/certs/registry.crt"]
-          lifecycle:
-            preStop:
-              httpGet:
-                host: air-run # air-run server service name (domain name)
-                path: /api/hook
-                port: 80
+                  "--registry-certificate=k8s-registry=/certs/registry.crt",
+                  "--cache=true",
+                  "--cache-dir=/cache"]
           volumeMounts:
             - name: workspace-storage
               mountPath: /workspace
             - name: certs-vol
               mountPath: /certs
+            - name: cache-vol
+              mountPath: /cache
             - name: kaniko-secret-vol
               mountPath: /kaniko/.docker
               readOnly: true
@@ -88,6 +86,10 @@ spec:
         - name: certs-vol
           hostPath:
             path: /opt/certs
+            type: Directory
+        - name: cache-vol
+          hostPath:
+            path: /opt/kaniko-cache
             type: Directory
         - name: kaniko-secret-vol
           secret:

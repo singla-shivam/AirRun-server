@@ -132,3 +132,6 @@ kubectl create secret generic regcred \
     --from-file=.dockerconfigjson=~/.docker/config.json \
     --type=kubernetes.io/dockerconfigjson
 ```
+
+### TODO
+Add kaniko cache doc /opt/kaniko-cache
