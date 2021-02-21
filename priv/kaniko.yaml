@@ -32,55 +32,28 @@ spec:
           imagePullPolicy: IfNotPresent
           command: [ "/bin/sh" ]
           args:
-            - -c
-            - >-
-              apk add curl jq;
-              sleep 10;
-
-              while true;
-              do
-              sleep 5;
-
-              container_state=$(curl
-              --header "Accept: application/json" 
-              --header "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
-              --request GET
-              --cert-type DER
-              --cacert "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-              https://kubernetes.default.svc/api/v1/namespaces/default/pods/?labelSelector=job-name=job-name-here
-              | jq '.items'
-              | jq '.[0].status.containerStatuses'
-              | jq '.[] | select(.name == "kaniko-build")'
-              | jq '.state');
-
-              echo "$container_state";
-              running_type=$(echo $container_state | jq '.running' | jq 'type');
-              if [[ $running_type != "\"null\"" ]]; then continue; fi;
-
-              data=$(echo "$container_state" | jq '{status: ., "job-name": "job-name-here"}');
-              curl
-              --header "Content-Type:application/json"
-              --request POST
-              --user "$(echo $SERVICE_ACCOUNT_USERNAME):$(echo $SERVICE_ACCOUNT_PASSWORD)"
-              --data $(echo "$data" | jq "tostring")
-              http://air-run/api/deployments/build-callback;
-
-              break;
-              done;
-              echo "Done"
+            - /scripts/kaniko-poll.sh
           env:
-            - name: "SERVICE_ACCOUNT_USERNAME"
+            - name: JOB_NAME
+              value: job-name-here
+            - name: SERVICE_ACCOUNT_USERNAME
               valueFrom:
                 secretKeyRef:
                   key: username
                   name: air-run-service-account-basic-auth
-            - name: "SERVICE_ACCOUNT_PASSWORD"
+            - name: SERVICE_ACCOUNT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: password
                   name: air-run-service-account-basic-auth
+          volumeMounts:
+            - mountPath: /scripts
+              name: scripts
       restartPolicy: Never
       volumes:
+        - name: scripts
+          configMap:
+            name: air-run-scripts-configmap
         - name: certs-vol
           hostPath:
             path: /opt/certs
