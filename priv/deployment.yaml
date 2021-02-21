@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-name-here
+  labels:
+    label: insert-labels-here
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      label: insert-labels-here
+  template:
+    metadata:
+      labels:
+        label: insert-labels-here
+    spec:
+      containers:
+        - name: deployment-main
+          image: deployment-image-here
+          imagePullPolicy: Always
+      imagePullSecrets:
+        - name: regcred

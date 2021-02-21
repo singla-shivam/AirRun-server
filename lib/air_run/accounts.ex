@@ -82,4 +82,20 @@ defmodule AirRun.Accounts do
     |> Deployment.changeset(%{"user_id" => user_id, "project_id" => project_id})
     |> Repo.insert()
   end
+
+  def mark_deployment_built(deployment_id) do
+    deployment = Repo.get!(Deployment, deployment_id)
+
+    deployment
+    |> Deployment.changeset(:built)
+    |> Repo.update!()
+  end
+
+  def mark_deployment_deployed(deployment_id) do
+    deployment = Repo.get!(Deployment, deployment_id)
+
+    deployment
+    |> Deployment.changeset(:deployed)
+    |> Repo.update!()
+  end
 end

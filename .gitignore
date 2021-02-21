@@ -31,3 +31,4 @@ air_run-*.tar
 *.dump
 
 uploads
+.idea

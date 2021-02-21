@@ -3,6 +3,7 @@ defmodule AirRunWeb.DeploymentController do
 
   alias AirRun.{Accounts, Kubernetes}
   alias AirRun.Accounts.Deployment
+  alias AirRun.Kubernetes.KanikoBuildJob
 
   action_fallback AirRunWeb.Fallbacks.User
 
@@ -52,6 +53,15 @@ defmodule AirRunWeb.DeploymentController do
     body = if body["_json"] != nil, do: Poison.decode!(body["_json"])
 
     IO.inspect(body)
+
+    job_name = body["job-name"]
+    %{
+      "deployment_id" => deployment_id,
+      "project_name" => project_name
+    } = KanikoBuildJob.from_job_name(job_name)
+
+    deployment = Accounts.mark_deployment_built(deployment_id)
+    Kubernetes.make_deployment(project_name, deployment_id, deployment.user_id)
 
     send_resp(conn, 202, "")
   end

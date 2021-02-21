@@ -9,30 +9,28 @@ spec:
       serviceAccountName: air-run-sa
       containers:
         - name: kaniko-build
-          image: gcr.io/kaniko-project/executor:latest
+          image: gcr.io/kaniko-project/executor:debug
           imagePullPolicy: IfNotPresent
-          args: ["--dockerfile=/workspace/Dockerfile",
+          args: [ "--dockerfile=/workspace/Dockerfile",
                   "--context=dir://context-dir",
                   "--destination=k8s-registry:80/image-name",
                   "--registry-mirror=k8s-registry:80",
                   "--skip-tls-verify=true",
                   "--registry-certificate=k8s-registry=/certs/registry.crt",
                   "--cache=true",
-                  "--cache-dir=/cache"]
+                  "--cache-dir=/cache" ]
           volumeMounts:
             - name: workspace-storage
               mountPath: /workspace
             - name: certs-vol
               mountPath: /certs
-            - name: cache-vol
-              mountPath: /cache
             - name: kaniko-secret-vol
               mountPath: /kaniko/.docker
               readOnly: true
         - name: kaniko-poll
           image: alpine:3.9
           imagePullPolicy: IfNotPresent
-          command: ["/bin/sh"]
+          command: [ "/bin/sh" ]
           args:
             - -c
             - >-
@@ -54,7 +52,7 @@ spec:
               | jq '.[0].status.containerStatuses'
               | jq '.[] | select(.name == "kaniko-build")'
               | jq '.state');
-    
+
               echo "$container_state";
               running_type=$(echo $container_state | jq '.running' | jq 'type');
               if [[ $running_type != "\"null\"" ]]; then continue; fi;
@@ -86,10 +84,6 @@ spec:
         - name: certs-vol
           hostPath:
             path: /opt/certs
-            type: Directory
-        - name: cache-vol
-          hostPath:
-            path: /opt/kaniko-cache
             type: Directory
         - name: kaniko-secret-vol
           secret:

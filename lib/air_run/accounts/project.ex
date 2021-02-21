@@ -1,8 +1,12 @@
 defmodule AirRun.Accounts.Project do
   @derive {Jason.Encoder, only: [:name, :user_id, :id, :prog_lang]}
+
   use Ecto.Schema
+
   import Ecto.Changeset
+
   alias AirRun.Accounts.User
+  alias AirRun.Utilities
 
   schema "projects" do
     field :name, :string
@@ -17,6 +21,7 @@ defmodule AirRun.Accounts.Project do
     |> cast(attrs, [:name, :user_id])
     |> foreign_key_constraint(:user_id)
     |> validate_required(:name, message: "missing_project_name")
+    |> validate_format(:name, Utilities.project_name_regex(), message: "missing_project_name")
     |> unique_constraint(:name, message: "project_name_already_exists")
   end
 end
