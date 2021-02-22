@@ -1,8 +1,8 @@
 # =====================================
 # required environment variables
 # * JOB_NAME
-# * $SERVICE_ACCOUNT_USERNAME
-# * $SERVICE_ACCOUNT_PASSWORD
+# * SERVICE_ACCOUNT_USERNAME
+# * SERVICE_ACCOUNT_PASSWORD
 # =====================================
 
 apk add curl jq
@@ -20,7 +20,7 @@ do
     --request GET \
     --cert-type DER \
     --cacert "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt" \
-    "https://kubernetes.default.svc/api/v1/namespaces/default/pods/?labelSelector=job-name=my-project-50-build"
+    "https://kubernetes.default.svc/api/v1/namespaces/default/pods/?labelSelector=job-name=$JOB_NAME"
   )
 
   # extract build container state from the pod list fetched

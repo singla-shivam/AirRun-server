@@ -1,6 +1,8 @@
 defmodule AirRun.Kubernetes.Deployment do
   alias AirRun.Kubernetes.KanikoBuildJob
 
+  import AirRun.Kubernetes.Utilities
+
   def get_deployment_config(project_name, deployment_id, user_id) do
     cwd = File.cwd!()
     path = Path.join(cwd, "priv/deployment.yaml")
@@ -11,16 +13,16 @@ defmodule AirRun.Kubernetes.Deployment do
     registry_address = KanikoBuildJob.get_registry_address
 
     labels = %{
-      "deployment_id" =>  to_string(deployment_id),
-      "user_id" => to_string(user_id),
+      "deployment_id" =>  deployment_id,
+      "user_id" => user_id,
       "project_name" => project_name,
     }
 
     config
-    |> change_name(deployment_name)
-    |> put_meta_labels(labels)
-    |> put_selector_labels(labels)
-    |> put_pod_template_labels(labels)
+    |> change_name(deployment_name, :deployment)
+    |> put_meta_labels(labels, :deployment)
+    |> put_selector_labels(labels, :deployment)
+    |> put_pod_template_labels(labels, :deployment)
     |> put_image_name(registry_address <> "/" <> image_name)
   end
 
@@ -49,7 +51,6 @@ defmodule AirRun.Kubernetes.Deployment do
 
     containers = get_in(config, containers_path)
     main_container = Enum.at(containers, 0)
-    IO.inspect(main_container)
     main_container = %{main_container | "image" => image_name}
     containers = List.replace_at(containers, 0, main_container)
 
