@@ -30,22 +30,6 @@ defmodule AirRun.Kubernetes.Deployment do
     "#{project_name}-#{deployment_id}-deployment"
   end
 
-  defp change_name(config, deployment_name) do
-    put_in(config, ["metadata", "name"], deployment_name)
-  end
-
-  defp put_meta_labels(config, labels) do
-    put_in(config, ["metadata", "labels"], labels)
-  end
-
-  defp put_selector_labels(config, labels) do
-    put_in(config, ["spec", "selector", "matchLabels"], labels)
-  end
-
-  defp put_pod_template_labels(config, labels) do
-    put_in(config, ["spec", "template", "metadata", "labels"], labels)
-  end
-
   defp put_image_name(config, image_name) do
     containers_path = ["spec", "template", "spec", "containers"]
 
