@@ -5,6 +5,7 @@ defmodule AirRun.Kubernetes.KanikoBuildJob do
 
   @containers_path ["spec", "template", "spec", "containers"]
   @k8s_registry "k8s-registry:31320"
+  @build_container_name "kaniko-build"
 
   def get_kaniko_config(project_name, deployment_id, project_path) do
     project_path = Path.relative(project_path)
@@ -28,7 +29,7 @@ defmodule AirRun.Kubernetes.KanikoBuildJob do
     |> put_meta_labels(labels, :job)
     |> put_pod_template_labels(labels, :job)
     |> put_build_args(project_path, image_name, job_name)
-    |> put_poll_environment(job_name)
+    |> put_env_value("kaniko-poll", "JOB_NAME", job_name, :job)
   end
 
   def get_image_name(project_name, deployment_id) do
@@ -51,13 +52,12 @@ defmodule AirRun.Kubernetes.KanikoBuildJob do
       "deployment_id" => deployment_id,
       "project_name" => project_name
     }
-
   end
 
   defp put_build_args(config, project_path, image_name, job_name) do
     build_args_path = @containers_path ++ [get_in_index(0), "args"]
 
-    containers = get_in(config, @containers_path)
+    containers = get_containers(config, :job)
     build_args = get_in(config, build_args_path)
 
     build_args =
@@ -71,13 +71,14 @@ defmodule AirRun.Kubernetes.KanikoBuildJob do
         end
       )
 
-    build_container = %{Enum.at(containers, 0) | "args" => build_args}
-    containers = List.replace_at(containers, 0, build_container)
+    build_container = get_container(config, @build_container_name, :job)
+    build_container = %{build_container | "args" => build_args}
 
-    put_in(
+    replace_container(
       config,
-      @containers_path,
-      containers
+      @build_container_name,
+      build_container,
+      :job
     )
   end
 

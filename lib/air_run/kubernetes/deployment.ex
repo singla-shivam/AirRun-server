@@ -30,6 +30,18 @@ defmodule AirRun.Kubernetes.Deployment do
     "#{project_name}-#{deployment_id}-deployment"
   end
 
+  def from_deployment_name(deployment_name) do
+    %{
+      "deployment_id" => deployment_id,
+      "project_name" => project_name
+    } = Regex.named_captures(Utilities.deployment_name_regex(), deployment_name)
+    deployment_id = String.to_integer(deployment_id)
+    %{
+      "deployment_id" => deployment_id,
+      "project_name" => project_name
+    }
+  end
+
   defp put_image_name(config, image_name) do
     containers_path = ["spec", "template", "spec", "containers"]
 

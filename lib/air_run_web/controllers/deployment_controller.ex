@@ -4,6 +4,7 @@ defmodule AirRunWeb.DeploymentController do
   alias AirRun.{Accounts, Kubernetes}
   alias AirRun.Accounts.Deployment
   alias AirRun.Kubernetes.KanikoBuildJob
+  alias AirRunWeb.Utilities
 
   action_fallback AirRunWeb.Fallbacks.User
 
@@ -48,13 +49,9 @@ defmodule AirRunWeb.DeploymentController do
     end
   end
 
-  def build_callback(conn, params) do
-    body = params
-    body = if body["_json"] != nil, do: Poison.decode!(body["_json"])
-
-    IO.inspect(body)
-
-    job_name = body["job-name"]
+  def built_callback(conn, params) do
+    params = Utilities.parse_callback_body(params)
+    job_name = params["job-name"]
     %{
       "deployment_id" => deployment_id,
       "project_name" => project_name
@@ -63,6 +60,13 @@ defmodule AirRunWeb.DeploymentController do
     deployment = Accounts.mark_deployment_built(deployment_id)
     Kubernetes.make_deployment(project_name, deployment_id, deployment.user_id)
 
+    send_resp(conn, 202, "")
+  end
+
+  def deployed_callback(conn, params) do
+    params = Utilities.parse_callback_body(params)
+    IO.inspect(params)
+    deployment_name = params["deployment-name"]
     send_resp(conn, 202, "")
   end
 end

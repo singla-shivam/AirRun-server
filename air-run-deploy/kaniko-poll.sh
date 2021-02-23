@@ -53,7 +53,7 @@ do
   --request POST \
   --user "$SERVICE_ACCOUNT_USERNAME:$SERVICE_ACCOUNT_PASSWORD" \
   --data "$(echo "$data" | jq "tostring")" \
-  http://air-run/api/deployments/build-callback
+  http://air-run/callback/deployments/built
 
   break
 done

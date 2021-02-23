@@ -37,16 +37,16 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
-          # livenessProbe:
-          #   httpGet:
-          #     path: /_health
-          #     port: http
-          #   initialDelaySeconds: 20
-          # readinessProbe:
-          #   httpGet:
-          #     path: /_health
-          #     port: http
-          #   initialDelaySeconds: 20
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: 8080
+            initialDelaySeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: 8080
+            initialDelaySeconds: 20
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

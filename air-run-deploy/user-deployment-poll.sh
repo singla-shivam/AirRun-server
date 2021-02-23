@@ -1,6 +1,6 @@
 # =====================================
 # required environment variables
-# * JOB_NAME
+# * DEPLOYMENT_NAME
 # * SERVICE_ACCOUNT_USERNAME
 # * SERVICE_ACCOUNT_PASSWORD
 # =====================================
@@ -12,48 +12,47 @@ while true
 do
   sleep 5
 
-  # get pods realated the given job in $JOB_NAME
-  pod_list=$(
+  # get deployment object with name in $DEPLOYMENT_NAME
+  deployment=$(
     curl \
     --header "Accept: application/json" \
     --header "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
     --request GET \
     --cert-type DER \
     --cacert "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt" \
-    "https://kubernetes.default.svc/api/v1/namespaces/default/pods/?labelSelector=job-name=$JOB_NAME"
+    "https://kubernetes.default.svc/apis/apps/v1/namespaces/default/deployments/$DEPLOYMENT_NAME/status"
   )
 
-  # extract build container state from the pod list fetched
-  container_state=$(
-    echo "$pod_list" \
-    | jq '.items' \
-    | jq '.[0].status.containerStatuses' \
-    | jq '.[] | select(.name == "kaniko-build")' \
-    | jq '.state' \
+  # required number of replicas
+  replicas_required=$(
+    echo "$deployment" \
+    | jq '.status.replicas' -r
   )
 
-  echo "$container_state"
+  # available number of replicas
+  replicas_available=$(
+    echo "$deployment_status" \
+    | jq '.status.availableReplicas' -r
+  )
 
-  # get the running property from the container state
-  running_type=$(echo "$container_state" | jq '.running' | jq 'type' -r)
-  # running property exists if its type is object (i.e. it is not null)
-  # it means the build is currently running, so continue polling
-  if [[ $running_type != "null" ]]
+  echo "replicas_required: $replicas_required"
+  echo "replicas_available: $replicas_available"
+
+  # if the replica requirement is not met, continue polling
+  if [[ $replicas_required != $replicas_available ]]
   then
     continue
   fi
 
-  # the build container is terminated
-  # either successfully built or terminated with an error
-  # the air-run server will handle the cases
-  data=$(echo "$container_state" | jq '{status: ., "job-name": env.JOB_NAME}')
+  # the replica requirement is met
+  data=$(echo "$deployment" | jq '{status: .status, "deployment-name": env.DEPLOYMENT_NAME}')
 
   curl \
   --header "Content-Type:application/json" \
   --request POST \
   --user "$SERVICE_ACCOUNT_USERNAME:$SERVICE_ACCOUNT_PASSWORD" \
   --data "$(echo "$data" | jq "tostring")" \
-  http://air-run/api/deployments/build-callback
+  http://air-run/callback/deployments/deployed
 
   break
 done

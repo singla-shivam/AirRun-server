@@ -1,4 +1,4 @@
-defmodule AirRunWeb.Auth.Plug.ServiceAccount do
+defmodule AirRunWeb.Auth.ServiceAccountPlug do
   use Plug.Builder
 
   plug :basic_auth
