@@ -13,15 +13,23 @@ do
   sleep 5
 
   # get deployment object with name in $DEPLOYMENT_NAME
-  deployment=$(
+  deployments_list=$(
     curl \
     --header "Accept: application/json" \
     --header "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
     --request GET \
     --cert-type DER \
     --cacert "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt" \
-    "https://kubernetes.default.svc/apis/apps/v1/namespaces/default/deployments/$DEPLOYMENT_NAME/status"
+    "https://kubernetes.default.svc/apis/apps/v1/namespaces/default/deployments/?labelSelector=deployment_name=$DEPLOYMENT_NAME"
   )
+
+  deployment=$(
+    echo "$deployments_list" \
+    | jq '.items' \
+    | jq '.[0]'
+  )
+
+  echo $deployment
 
   # required number of replicas
   replicas_required=$(
@@ -31,7 +39,7 @@ do
 
   # available number of replicas
   replicas_available=$(
-    echo "$deployment_status" \
+    echo "$deployment" \
     | jq '.status.availableReplicas' -r
   )
 
@@ -45,7 +53,7 @@ do
   fi
 
   # the replica requirement is met
-  data=$(echo "$deployment" | jq '{status: .status, "deployment-name": env.DEPLOYMENT_NAME}')
+  data=$(echo "$deployment" | jq '{status: .status, "deployment_name": env.DEPLOYMENT_NAME}')
 
   curl \
   --header "Content-Type:application/json" \

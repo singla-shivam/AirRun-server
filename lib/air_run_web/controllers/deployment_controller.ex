@@ -51,7 +51,7 @@ defmodule AirRunWeb.DeploymentController do
 
   def built_callback(conn, params) do
     params = Utilities.parse_callback_body(params)
-    job_name = params["job-name"]
+    job_name = params["job_name"]
     %{
       "deployment_id" => deployment_id,
       "project_name" => project_name
@@ -66,7 +66,7 @@ defmodule AirRunWeb.DeploymentController do
   def deployed_callback(conn, params) do
     params = Utilities.parse_callback_body(params)
     IO.inspect(params)
-    deployment_name = params["deployment-name"]
+    deployment_name = params["deployment_name"]
     send_resp(conn, 202, "")
   end
 end

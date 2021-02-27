@@ -20,7 +20,7 @@ do
     --request GET \
     --cert-type DER \
     --cacert "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt" \
-    "https://kubernetes.default.svc/api/v1/namespaces/default/pods/?labelSelector=job-name=$JOB_NAME"
+    "https://kubernetes.default.svc/api/v1/namespaces/default/pods/?labelSelector=job_name=$JOB_NAME"
   )
 
   # extract build container state from the pod list fetched
@@ -46,7 +46,7 @@ do
   # the build container is terminated
   # either successfully built or terminated with an error
   # the air-run server will handle the cases
-  data=$(echo "$container_state" | jq '{status: ., "job-name": env.JOB_NAME}')
+  data=$(echo "$container_state" | jq '{status: ., "job_name": env.JOB_NAME}')
 
   curl \
   --header "Content-Type:application/json" \

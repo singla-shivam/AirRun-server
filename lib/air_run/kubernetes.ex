@@ -31,7 +31,6 @@ defmodule AirRun.Kubernetes do
     case post("/apis/apps/v1/namespaces/default/deployments", Poison.encode!(deployment_config), headers) do
       {:ok, %HTTPoison.Response{status_code: 201, body: body}} ->
         IO.puts("created")
-        IO.inspect(body)
 
       {:ok, %HTTPoison.Response{status_code: 404}} ->
         IO.puts("Not found :(")

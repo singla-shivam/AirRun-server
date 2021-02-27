@@ -3,6 +3,8 @@ defmodule AirRun.Kubernetes.Deployment do
 
   import AirRun.Kubernetes.Utilities
 
+  @deployment_container_name "deployment-main"
+
   def get_deployment_config(project_name, deployment_id, user_id) do
     cwd = File.cwd!()
     path = Path.join(cwd, "priv/deployment.yaml")
@@ -13,6 +15,7 @@ defmodule AirRun.Kubernetes.Deployment do
     registry_address = KanikoBuildJob.get_registry_address
 
     labels = %{
+      "deployment_name" =>  deployment_name,
       "deployment_id" =>  deployment_id,
       "user_id" => user_id,
       "project_name" => project_name,
@@ -23,6 +26,7 @@ defmodule AirRun.Kubernetes.Deployment do
     |> put_meta_labels(labels, :deployment)
     |> put_selector_labels(labels, :deployment)
     |> put_pod_template_labels(labels, :deployment)
+    |> put_env_value("deployment-poll", "DEPLOYMENT_NAME", deployment_name, :deployment)
     |> put_image_name(registry_address <> "/" <> image_name)
   end
 
@@ -43,13 +47,8 @@ defmodule AirRun.Kubernetes.Deployment do
   end
 
   defp put_image_name(config, image_name) do
-    containers_path = ["spec", "template", "spec", "containers"]
-
-    containers = get_in(config, containers_path)
-    main_container = Enum.at(containers, 0)
+    main_container = get_container(config, @deployment_container_name, :deployment)
     main_container = %{main_container | "image" => image_name}
-    containers = List.replace_at(containers, 0, main_container)
-
-    put_in(config, containers_path, containers)
+    replace_container(config, @deployment_container_name, main_container, :deployment)
   end
 end
