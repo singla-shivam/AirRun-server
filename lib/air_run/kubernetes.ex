@@ -1,7 +1,7 @@
 defmodule AirRun.Kubernetes do
   use HTTPoison.Base
 
-  alias AirRun.Kubernetes.{KanikoBuildJob, Deployment}
+  alias AirRun.Kubernetes.{KanikoBuildJob, Deployment, Service}
 
   def process_request_url(url) do
     k8s_api_host = System.get_env("K8S_APISERVER")
@@ -51,6 +51,26 @@ defmodule AirRun.Kubernetes do
     case post("/apis/batch/v1/namespaces/default/jobs", Poison.encode!(kaniko_config), headers) do
       {:ok, %HTTPoison.Response{status_code: 201, body: body}} ->
         IO.puts("created")
+
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        IO.puts("Not found :(")
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        IO.inspect(reason)
+
+      x ->
+        IO.inspect(x)
+    end
+  end
+
+  def create_service(project_name, deployment_id, user_id) do
+    service_config = Service.get_service_config(project_name, deployment_id, user_id)
+    headers = [{"Content-type", "application/json"}]
+
+    case post("/api/v1/namespaces/default/services", Poison.encode!(service_config), headers) do
+      {:ok, %HTTPoison.Response{status_code: 201, body: body}} ->
+        IO.puts("created")
+        IO.inspect(body)
 
       {:ok, %HTTPoison.Response{status_code: 404}} ->
         IO.puts("Not found :(")
