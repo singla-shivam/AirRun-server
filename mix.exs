@@ -49,7 +49,7 @@ defmodule AirRun.MixProject do
       {:poison, "~> 3.1"},
       {:httpoison, "~> 1.8"},
       {:yaml_elixir, "~> 2.4"},
-      {:ex_doc, "~> 0.23", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.23", only: :dev, runtime: false}
     ]
   end
 
