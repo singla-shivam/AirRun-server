@@ -12,13 +12,13 @@ defmodule AirRun.Kubernetes.Deployment do
 
     deployment_name = get_deployment_name(project_name, deployment_id)
     image_name = KanikoBuildJob.get_image_name(project_name, deployment_id)
-    registry_address = KanikoBuildJob.get_registry_address
+    registry_address = KanikoBuildJob.get_registry_address()
 
     labels = %{
-      "deployment_name" =>  deployment_name,
-      "deployment_id" =>  deployment_id,
+      "deployment_name" => deployment_name,
+      "deployment_id" => deployment_id,
       "user_id" => user_id,
-      "project_name" => project_name,
+      "project_name" => project_name
     }
 
     config
@@ -39,7 +39,9 @@ defmodule AirRun.Kubernetes.Deployment do
       "deployment_id" => deployment_id,
       "project_name" => project_name
     } = Regex.named_captures(Utilities.deployment_name_regex(), deployment_name)
+
     deployment_id = String.to_integer(deployment_id)
+
     %{
       "deployment_id" => deployment_id,
       "project_name" => project_name

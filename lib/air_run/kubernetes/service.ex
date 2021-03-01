@@ -10,16 +10,17 @@ defmodule AirRun.Kubernetes.Service do
 
     selector_labels = %{
       "project_name" => project_name,
-      "user_id" => user_id,
+      "user_id" => user_id
     }
 
-    labels = Map.merge(
-      selector_labels,
-      %{
-        "service_name" => service_name,
-        "deployment_id" => deployment_id,
-      }
-    )
+    labels =
+      Map.merge(
+        selector_labels,
+        %{
+          "service_name" => service_name,
+          "deployment_id" => deployment_id
+        }
+      )
 
     config
     |> change_name(service_name, :service)

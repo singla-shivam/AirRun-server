@@ -28,7 +28,11 @@ defmodule AirRun.Kubernetes do
 
     headers = [{"Content-type", "application/json"}]
 
-    case post("/apis/apps/v1/namespaces/default/deployments", Poison.encode!(deployment_config), headers) do
+    case post(
+           "/apis/apps/v1/namespaces/default/deployments",
+           Poison.encode!(deployment_config),
+           headers
+         ) do
       {:ok, %HTTPoison.Response{status_code: 201, body: body}} ->
         IO.puts("created")
 

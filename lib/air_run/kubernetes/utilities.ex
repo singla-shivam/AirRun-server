@@ -6,7 +6,6 @@ defmodule AirRun.Kubernetes.Utilities do
 
   @containers_path ["spec", "template", "spec", "containers"]
 
-
   @doc """
   Puts the labels in the metadata of the config
   """
@@ -30,7 +29,6 @@ defmodule AirRun.Kubernetes.Utilities do
     put_in(config, ["spec", "selector", "matchLabels"], labels)
   end
 
-
   @doc """
   Puts the labels in the metadata of the the pod template in the config
   """
@@ -40,7 +38,6 @@ defmodule AirRun.Kubernetes.Utilities do
     put_in(config, ["spec", "template", "metadata", "labels"], labels)
   end
 
-
   @doc """
   Changes the meta-name of the config passed
   """
@@ -48,7 +45,6 @@ defmodule AirRun.Kubernetes.Utilities do
   def change_name(config, name, _resource_type) do
     put_in(config, ["metadata", "name"], name)
   end
-
 
   @doc """
   Put environment variable with name `env_name` in the container specified.
@@ -66,17 +62,17 @@ defmodule AirRun.Kubernetes.Utilities do
     container = get_container(config, container_name, _resource_type)
     env_variables = container["env"]
 
-    env_variables = replace_when(
-      env_variables,
-      fn el -> el["name"] == env_name end,
-      fn el -> %{el | "value" => env_value} end
-    )
+    env_variables =
+      replace_when(
+        env_variables,
+        fn el -> el["name"] == env_name end,
+        fn el -> %{el | "value" => env_value} end
+      )
 
     container = %{container | "env" => env_variables}
 
     replace_container(config, container_name, container, _resource_type)
   end
-
 
   @doc """
   Retrieves list of containers from config with given resource type
@@ -94,7 +90,6 @@ defmodule AirRun.Kubernetes.Utilities do
     put_in(config, @containers_path, containers)
   end
 
-
   @doc """
   Retrieves the container with given `container_name` from `config`
   """
@@ -104,7 +99,6 @@ defmodule AirRun.Kubernetes.Utilities do
     Enum.find(containers, fn c -> c["name"] == container_name end)
   end
 
-
   @doc """
   Replace the container with given `container_name` in `config`
   with given `container`
@@ -113,33 +107,35 @@ defmodule AirRun.Kubernetes.Utilities do
   def replace_container(config, container_name, container, _resource_type) do
     containers = get_containers(config, _resource_type)
 
-    containers = replace_when(
-      containers,
-      fn c -> c["name"] == container_name end,
-      fn _ -> container end
-    )
+    containers =
+      replace_when(
+        containers,
+        fn c -> c["name"] == container_name end,
+        fn _ -> container end
+      )
 
     replace_containers(config, containers, _resource_type)
   end
 
-
   defp sanitize_labels(labels) do
     for {key, value} <- labels, into: %{} do
-      value = value
-              |> to_string
-              |> String.replace(":", "--")
+      value =
+        value
+        |> to_string
+        |> String.replace(":", "--")
+
       {key, to_string(value)}
     end
   end
 
-
   defp replace_when(list, condition, value) do
-    list = Enum.map(
-      list,
-      fn element ->
-        if condition.(element), do: value.(element), else: element
-      end
-    )
+    list =
+      Enum.map(
+        list,
+        fn element ->
+          if condition.(element), do: value.(element), else: element
+        end
+      )
 
     element = Enum.find(list, fn el -> condition.(el) end)
     if element == nil, do: list ++ [value.()], else: list

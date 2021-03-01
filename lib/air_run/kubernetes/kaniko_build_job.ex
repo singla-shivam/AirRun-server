@@ -18,10 +18,10 @@ defmodule AirRun.Kubernetes.KanikoBuildJob do
     image_name = get_image_name(project_name, deployment_id)
 
     labels = %{
-      "deployment_id" =>  deployment_id,
+      "deployment_id" => deployment_id,
       "project_name" => project_name,
       "job_name" => job_name,
-      "image_name" => image_name,
+      "image_name" => image_name
     }
 
     kaniko_config
@@ -47,7 +47,9 @@ defmodule AirRun.Kubernetes.KanikoBuildJob do
       "deployment_id" => deployment_id,
       "project_name" => project_name
     } = Regex.named_captures(Utilities.build_job_name_regex(), job_name)
+
     deployment_id = String.to_integer(deployment_id)
+
     %{
       "deployment_id" => deployment_id,
       "project_name" => project_name
@@ -90,19 +92,20 @@ defmodule AirRun.Kubernetes.KanikoBuildJob do
 
     job_name_env = %{
       "name" => "JOB_NAME",
-      "value" => job_name,
+      "value" => job_name
     }
 
-    poll_env = Enum.map(
-      poll_env,
-      fn arg ->
-        if arg["name"] == "JOB_NAME" do
-          job_name_env
-        else
-          arg
+    poll_env =
+      Enum.map(
+        poll_env,
+        fn arg ->
+          if arg["name"] == "JOB_NAME" do
+            job_name_env
+          else
+            arg
+          end
         end
-      end
-    )
+      )
 
     poll_container = %{Enum.at(containers, 1) | "env" => poll_env}
     containers = List.replace_at(containers, 1, poll_container)
@@ -118,6 +121,7 @@ defmodule AirRun.Kubernetes.KanikoBuildJob do
     fn _, data, next ->
       data
       |> Enum.at(index)
-      |> next.() end
+      |> next.()
+    end
   end
 end
