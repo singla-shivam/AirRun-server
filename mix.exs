@@ -5,12 +5,17 @@ defmodule AirRun.MixProject do
     [
       app: :air_run,
       version: "0.1.0",
+      name: "AirRun",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      source_url: "https://github.com/singla-shivam/AirRun-server/",
+      docs: [
+        source_ref: "main"
+      ]
     ]
   end
 

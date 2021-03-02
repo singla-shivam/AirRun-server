@@ -1,6 +1,6 @@
 defmodule AirRun.Utilities do
   def project_name_regex() do
-    ~r/^(?!-)[a-zA-Z\d\-]+(?<!-)$/
+    ~r/^[a-z\d]+(\-[a-z\d]+)*$/
   end
 
   def build_job_name_regex() do

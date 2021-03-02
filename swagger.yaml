@@ -99,7 +99,7 @@ paths:
                 enum:
                   - unauthorized
         404:
-          description: Wrong password
+          description: User with given email id does not exist
           schema:
             type: object
             properties:

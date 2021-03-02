@@ -16,7 +16,7 @@ defmodule AirRunWeb.UserControllerTest do
   end
 
   describe "create user" do
-    test "creates user succesfully when it does not exixts", %{conn: conn} do
+    test "creates user successfully when it does not exists", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :create), @new_user)
       assert %{"token" => id, "user" => user} = json_response(conn, 201)
       assert %{"email" => "email@email.com", "id" => id} = user
@@ -65,7 +65,7 @@ defmodule AirRunWeb.UserControllerTest do
   end
 
   describe "sign-in user" do
-    test "succesfully sign-in users", %{conn: conn} do
+    test "successfully sign-in users", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :create), @new_user)
       conn = post(conn, Routes.user_path(conn, :signin), @new_user)
       assert %{"token" => id, "user" => user} = json_response(conn, 200)

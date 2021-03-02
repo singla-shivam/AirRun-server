@@ -1,4 +1,14 @@
 defmodule AirRunWeb.UserController do
+  @moduledoc """
+  Controller which is responsible for authenticating user.
+
+  It uses JWT token strategy for authentication using
+  [Guardian](https://hexdocs.pm/guardian/Guardian.html). The `user_id`
+  is used the subject for token.
+
+  Currently, sign-in with email and password is supported.
+  """
+
   use AirRunWeb, :controller
 
   alias AirRun.Accounts
@@ -11,14 +21,18 @@ defmodule AirRunWeb.UserController do
   @doc """
   Creates a new user from the given user parameters(email, password)
 
-  Sends 201 if created succesfully.
-  Possible errors are -
-    * "user_already_exists"
+  Sends 201 if created successfully.
+
+  Sends 400 with one possible errors -
     * "invalid_email"
     * "missing_email"
     * "missing_password"
     * "unprocessable_entity"
+
+  Sends 409 with one possible errors -
+    * "user_already_exists"
   """
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, user_params) do
     with {:ok, %User{} = user} <- Accounts.create_user(user_params),
          {:ok, token, _claims} <- Guardian.encode_and_sign(user) do
@@ -31,10 +45,15 @@ defmodule AirRunWeb.UserController do
   @doc """
   Sign-in's the user
 
-  Sends 200, if succefully signed in
-  Possible errors are -
-    * "user_not_found"
+  Sends 200, if successfully signed in.
+
+  Sends 400 bad request when either email or password, or both are missing
+
+  Sends 404 when the user with given email id does not exist
   """
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def signin(conn, params)
+
   def signin(conn, %{"email" => email, "password" => password}) do
     with {:ok, user, token} <- Guardian.authenticate(email, password) do
       conn
@@ -43,33 +62,9 @@ defmodule AirRunWeb.UserController do
     end
   end
 
-  @doc """
-  Sends 400 bad request when either email or password, or both are missing
-  """
   def signin(conn, _) do
     conn
     |> put_status(:bad_request)
     |> json(%{code: "missing_email_or_pass"})
-  end
-
-  def abc(conn, _) do
-    case Kubernetes.get("/api") do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        IO.puts("success")
-        IO.inspect(body)
-
-      {:ok, %HTTPoison.Response{status_code: 404}} ->
-        IO.puts("Not found :(")
-
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        IO.inspect(reason)
-
-      _ ->
-        IO.inspect("error")
-    end
-
-    Kubernetes.make_deployment()
-
-    send_resp(conn, 200, "OK\n")
   end
 end
