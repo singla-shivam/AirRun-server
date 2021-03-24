@@ -135,3 +135,23 @@ kubectl create secret generic regcred \
 
 ### TODO
 Add kaniko cache doc /opt/kaniko-cache
+
+## Production Kubernetes cluster
+
+### Prerequisites
+
+### Install postgres
+
+* Mount a persistent storage to /data of the node
+* Add the following label to the node with the peristent storage attached in last step
+```bash
+kubectl label nodes <node-name> air-run-postgres=true
+```
+* Create a persistent volume using
+```bash
+kubectl apply -f priv/mix-deploy/postgres-pv.yaml
+```
+* Deploy postgres database
+```bash
+mix air_run.postgres.init
+```
