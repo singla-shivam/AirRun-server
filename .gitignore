@@ -32,3 +32,4 @@ air_run-*.tar
 
 uploads
 .idea
+deploy-config.json

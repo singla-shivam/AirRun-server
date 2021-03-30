@@ -1,5 +1,184 @@
 defmodule Mix.Tasks.AirRun.Init do
-  def run(args) do
-    IO.inspect("sfd")
+  use GenServer
+
+  alias Mix.DeployConfig
+  alias Mix.Utilities
+  alias AirRun.Kubernetes.Secret
+
+  @impl true
+  def init(:ok) do
+    config = DeployConfig.read_config!()
+    {:ok, config}
+  end
+
+  @impl true
+  def handle_call({:update, keys, value}, _from, config) do
+    keys = Enum.map(keys, fn key -> Access.key(key, %{}) end)
+    config = put_in(config, keys, value)
+    DeployConfig.write_config!(config)
+    {:reply, nil, config}
+  end
+
+  @impl true
+  def handle_call({:get, path}, _from, config) do
+    value = get_in(config, path)
+    {:reply, value, config}
+  end
+
+  defp tick(server, current_step \\ nil) do
+    case current_step do
+      nil ->
+        generate_guardian_secret(server)
+
+      :guardian ->
+        generate_secret_key_base(server)
+
+      :secret_key ->
+        generate_database_url(server)
+
+      :database_url ->
+        ask_air_run_server_username(server)
+
+      :server_username ->
+        ask_air_run_server_password(server)
+
+      :server_password ->
+        apply_secret(server, ["air-run-secret"], :apply_general_sercret)
+
+      :apply_general_sercret ->
+        apply_secret(server, ["air-run-service-secret"], :apply_service_sercret)
+
+      :apply_service_sercret ->
+        true
+
+      _ ->
+        raise("Unknown step")
+    end
+  end
+
+  def run(_args) do
+    {:ok, task} = GenServer.start_link(Mix.Tasks.AirRun.Init, :ok)
+    #    tick(task)
+    tick(task, :server_password)
+  end
+
+  def create_app_secrets() do
+    secret_config = Secret.get_secret_config("air-run-server")
+  end
+
+  defp generate_database_url(server) do
+    Mix.shell().info("Generating database url")
+    postgres_config = GenServer.call(server, {:get, ["postgres"]})
+
+    username = "postgres"
+    password = postgres_config["password"]
+    service_name = postgres_config["release_name"]
+    database_name = postgres_config["database_name"]
+
+    url = "ecto://#{username}:#{password}@#{service_name}-postgresql/#{database_name}"
+
+    GenServer.call(server, {:update, ["air-run-secret", "database-url"], url})
+    tick(server, :database_url)
+  end
+
+  defp ask_air_run_server_username(server) do
+    path = ["air-run-service-secret", "username"]
+    ask_required_secret(server, path, :server_username)
+  end
+
+  defp ask_air_run_server_password(server) do
+    path = ["air-run-service-secret", "password"]
+    ask_required_secret(server, path, :server_password)
+  end
+
+  defp generate_secret_key_base(server) do
+    path = ["air-run-secret", "secret-key-base"]
+    generate_secret(server, path, :secret_key)
+  end
+
+  defp generate_guardian_secret(server) do
+    path = ["air-run-secret", "guardian-secret-key"]
+    generate_secret(server, path, :guardian)
+  end
+
+  defp generate_secret(server, path, step, override? \\ false) do
+    secret = GenServer.call(server, {:get, path})
+
+    names = [guardian: "guardian secret", secret_key: "secret key base"]
+    name = names[step]
+
+    if secret != nil and !override? do
+      is_yes = prompt("A #{name} already exists. Generate new?", false)
+
+      if is_yes,
+        do: generate_secret(server, path, step, true),
+        else: tick(server, step)
+    else
+      Mix.shell().info("Generating #{name}")
+
+      Mix.Shell.cmd(
+        "mix guardian.gen.secret",
+        fn x ->
+          x = String.trim(x)
+          GenServer.call(server, {:update, path, x})
+          tick(server, step)
+        end
+      )
+    end
+  end
+
+  defp ask_required_secret(server, path, step) do
+    default = GenServer.call(server, {:get, path})
+
+    names = [server_username: "Username", server_password: "Password"]
+    name = names[step]
+
+    data =
+      Mix.shell().prompt("#{name} for air-run service? [#{default}]")
+      |> String.trim()
+
+    cond do
+      data == "" and default == nil ->
+        ask_required_secret(server, path, step)
+
+      data == "" ->
+        tick(server, step)
+
+      true ->
+        GenServer.call(server, {:update, path, data})
+        tick(server, step)
+    end
+  end
+
+  defp prompt(message, default \\ true) do
+    if default do
+      Mix.shell().yes?(message)
+    else
+      res =
+        Mix.shell().prompt(message <> " [y/N]")
+        |> String.trim()
+        |> String.downcase()
+
+      res == "y"
+    end
+  end
+
+  defp apply_secret(server, path, step) do
+    data =
+      GenServer.call(server, {:get, path})
+      |> Utilities.capitalize_keys()
+
+    secret =
+      Secret.get_secret_config("air-run")
+      |> Poison.encode!()
+
+    Mix.Shell.cmd(
+#      "echo \"#{secret}\" | kubectl apply -f -",
+      ~s"echo #{secret}",
+      fn x ->
+        IO.inspect(x)
+        tick(server, step)
+      end
+    )
   end
 end
