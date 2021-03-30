@@ -43,13 +43,18 @@ defmodule Mix.Tasks.AirRun.Init do
         ask_air_run_server_password(server)
 
       :server_password ->
-        apply_secret(server, ["air-run-secret"], :apply_general_sercret)
+        apply_secret(server, ["air-run-secret"], "air-run", :apply_general_sercret)
 
       :apply_general_sercret ->
-        apply_secret(server, ["air-run-service-secret"], :apply_service_sercret)
+        apply_secret(
+          server,
+          ["air-run-service-secret"],
+          "air-run-service-account-basic-auth",
+          :apply_service_sercret
+        )
 
       :apply_service_sercret ->
-        true
+        deploy_server(server)
 
       _ ->
         raise("Unknown step")
@@ -59,7 +64,7 @@ defmodule Mix.Tasks.AirRun.Init do
   def run(_args) do
     {:ok, task} = GenServer.start_link(Mix.Tasks.AirRun.Init, :ok)
     #    tick(task)
-    tick(task, :server_password)
+    tick(task)
   end
 
   def create_app_secrets() do
@@ -99,6 +104,9 @@ defmodule Mix.Tasks.AirRun.Init do
   defp generate_guardian_secret(server) do
     path = ["air-run-secret", "guardian-secret-key"]
     generate_secret(server, path, :guardian)
+  end
+
+  defp deploy_server(server) do
   end
 
   defp generate_secret(server, path, step, override? \\ false) do
@@ -163,20 +171,23 @@ defmodule Mix.Tasks.AirRun.Init do
     end
   end
 
-  defp apply_secret(server, path, step) do
+  defp apply_secret(server, path, secret_name, step) do
+    data = GenServer.call(server, {:get, path})
+
     data =
-      GenServer.call(server, {:get, path})
-      |> Utilities.capitalize_keys()
+      if String.contains?(secret_name, "auth"),
+        do: data,
+        else: Utilities.capitalize_keys(data)
 
     secret =
-      Secret.get_secret_config("air-run")
+      Secret.get_secret_config(secret_name)
+      |> Secret.put_string_data(data)
       |> Poison.encode!()
 
     Mix.Shell.cmd(
-#      "echo \"#{secret}\" | kubectl apply -f -",
-      ~s"echo #{secret}",
+      "echo '#{secret}' | kubectl apply -f -",
       fn x ->
-        IO.inspect(x)
+        IO.puts(x)
         tick(server, step)
       end
     )
