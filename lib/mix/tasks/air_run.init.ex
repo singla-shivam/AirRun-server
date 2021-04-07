@@ -43,27 +43,26 @@ defmodule Mix.Tasks.AirRun.Init do
         ask_air_run_server_password(server)
 
       :server_password ->
-        apply_secret(server, ["air-run-secret"], "air-run", :apply_general_sercret)
+        apply_secret(server, ["air-run-secret"], "air-run", :apply_general_secret)
 
-      :apply_general_sercret ->
+      :apply_general_secret ->
         apply_secret(
           server,
           ["air-run-service-secret"],
           "air-run-service-account-basic-auth",
-          :apply_service_sercret
+          :apply_service_secret
         )
 
-      :apply_service_sercret ->
+      :apply_service_secret ->
         deploy_server(server)
 
       _ ->
-        raise("Unknown step")
+        raise("Unknown step: " <> to_string(current_step))
     end
   end
 
   def run(_args) do
     {:ok, task} = GenServer.start_link(Mix.Tasks.AirRun.Init, :ok)
-    #    tick(task)
     tick(task)
   end
 
@@ -107,6 +106,7 @@ defmodule Mix.Tasks.AirRun.Init do
   end
 
   defp deploy_server(server) do
+
   end
 
   defp generate_secret(server, path, step, override? \\ false) do
@@ -138,11 +138,17 @@ defmodule Mix.Tasks.AirRun.Init do
   defp ask_required_secret(server, path, step) do
     default = GenServer.call(server, {:get, path})
 
-    names = [server_username: "Username", server_password: "Password"]
-    name = names[step]
+    names = [
+      server_username: {"air-run service", "Username"},
+      server_password: {"air-run service", "Password"},
+      k8s_registry_username: {"k8s-registry", "Username"},
+      k8s_registry_password: {"k8s-registry", "Password"}
+    ]
+
+    {purpose, name} = names[step]
 
     data =
-      Mix.shell().prompt("#{name} for air-run service? [#{default}]")
+      Mix.shell().prompt("#{name} for #{purpose}? [#{default}]")
       |> String.trim()
 
     cond do
@@ -191,5 +197,12 @@ defmodule Mix.Tasks.AirRun.Init do
         tick(server, step)
       end
     )
+  end
+
+  defp get_k8s_creds(server) do
+    username = GenServer.call(server, {:get, ["k8s-registry", "username"]})
+    password = GenServer.call(server, {:get, ["k8s-registry", "password"]})
+
+    {username, password}
   end
 end

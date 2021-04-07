@@ -11,6 +11,8 @@ spec:
       labels:
         label: insert-labels-here
     spec:
+      nodeSelector:
+        air-run-kaniko: Schedule
       serviceAccountName: air-run-sa
       containers:
         - name: kaniko-build
@@ -61,11 +63,11 @@ spec:
             name: air-run-scripts-configmap
         - name: certs-vol
           hostPath:
-            path: /opt/certs
+            path: /data/kaniko/certs
             type: Directory
         - name: kaniko-secret-vol
           secret:
-            secretName: kaniko-secret
+            secretName: regcred
         - name: "workspace-storage"
           persistentVolumeClaim:
             claimName: air-run-pv-claim

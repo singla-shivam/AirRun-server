@@ -143,9 +143,14 @@ Add kaniko cache doc /opt/kaniko-cache
 ### Install postgres
 
 * Mount a persistent storage to /data of the node
-* Add the following label to the node with the peristent storage attached in last step
+* Create following directories in the /data
+  1. /data/postgres
+  2. /data/kaniko
+  3. /data/uploads
+* Add the following labels to the node with the persistent storage attached in last step
 ```bash
 kubectl label nodes <node-name> air-run-postgres=true
+kubectl label nodes <node-name> air-run-kaniko=true
 ```
 * Create a persistent volume using
 ```bash
@@ -154,4 +159,34 @@ kubectl apply -f priv/mix-deploy/postgres-pv.yaml
 * Deploy postgres database
 ```bash
 mix air_run.postgres.init
+```
+
+### Setup registry
+
+* Generate self-signed certificates for private docker repository
+```bash
+cd /data/kaniko/certs
+sudo openssl req -newkey rsa:4096 -nodes -sha256 -keyout \
+registry.key -x509 -days 365 -out registry.crt
+```
+
+* Create htpassword file
+```bash
+cd /data/kaniko/certs
+htpasswd -Bbc pass-file <user-name> <password>
+```
+
+* Generate docker config secret
+```bash
+kubectl create secret docker-registry regcred \
+  --docker-username=<user-name> \
+  --docker-password=<password> \
+  --docker-server=k8s-registry:31320
+```
+
+* Add new host `127.0.0.1 k8s-registry` to the node
+
+* Create the deployment
+```bash
+kubectl apply -f priv/mix-deploy/private-registry.yaml
 ```

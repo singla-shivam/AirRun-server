@@ -14,14 +14,16 @@ spec:
       labels:
         app: k8s-registry
     spec:
+      nodeSelector:
+        air-run-kaniko: Schedule
       volumes:
         - name: certs-vol
           hostPath:
-            path: /opt/certs
+            path: /data/kaniko/certs
             type: Directory
         - name: registry-vol
           hostPath:
-            path: /opt/registry
+            path: /data/kaniko/registry
             type: Directory
 
       containers:

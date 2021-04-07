@@ -11,7 +11,7 @@ defmodule AirRun.Kubernetes.KanikoBuildJob do
     project_path = Path.relative(project_path)
 
     cwd = File.cwd!()
-    path = Path.join(cwd, "priv/kaniko.yaml")
+    path = Path.join(cwd, "priv/kubernetes/kaniko.yaml")
     {:ok, kaniko_config} = YamlElixir.read_from_file(path)
 
     job_name = get_job_name(project_name, deployment_id)
