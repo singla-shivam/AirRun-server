@@ -20,8 +20,8 @@ spec:
           imagePullPolicy: IfNotPresent
           args: [ "--dockerfile=/workspace/Dockerfile",
                   "--context=dir://context-dir",
-                  "--destination=k8s-registry:80/image-name",
-                  "--registry-mirror=k8s-registry:80",
+                  "--destination=k8s-registry:31320/image-name",
+                  "--registry-mirror=k8s-registry:31320",
                   "--skip-tls-verify=true",
                   "--registry-certificate=k8s-registry=/certs/registry.crt",
                   "--cache=true",
