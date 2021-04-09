@@ -16,12 +16,11 @@ spec:
       serviceAccountName: air-run-sa
       containers:
         - name: kaniko-build
-          image: gcr.io/kaniko-project/executor:debug
+          image: gcr.io/kaniko-project/executor:v1.5.2
           imagePullPolicy: IfNotPresent
           args: [ "--dockerfile=/workspace/Dockerfile",
                   "--context=dir://context-dir",
-                  "--destination=k8s-registry:31320/image-name",
-                  "--registry-mirror=k8s-registry:31320",
+                  "--destination=k8s-registry:80/image-name",
                   "--skip-tls-verify=true",
                   "--registry-certificate=k8s-registry=/certs/registry.crt",
                   "--cache=true",
@@ -35,7 +34,7 @@ spec:
               mountPath: /kaniko/.docker
               readOnly: true
         - name: kaniko-poll
-          image: alpine:3.9
+          image: alpine:3.13
           imagePullPolicy: IfNotPresent
           command: [ "/bin/sh" ]
           args:
@@ -56,6 +55,9 @@ spec:
           volumeMounts:
             - mountPath: /scripts
               name: scripts
+            - name: kaniko-secret-vol
+              mountPath: /kaniko/.docker
+              readOnly: true
       restartPolicy: Never
       volumes:
         - name: scripts
@@ -67,7 +69,7 @@ spec:
             type: Directory
         - name: kaniko-secret-vol
           secret:
-            secretName: regcred
+            secretName: kaniko-secret
         - name: "workspace-storage"
           persistentVolumeClaim:
             claimName: air-run-pv-claim

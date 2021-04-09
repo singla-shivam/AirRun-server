@@ -145,12 +145,13 @@ Add kaniko cache doc /opt/kaniko-cache
 * Mount a persistent storage to /data of the node
 * Create following directories in the /data
   1. /data/postgres
-  2. /data/kaniko
-  3. /data/uploads
+  2. /data/kaniko/certs
+  3. /data/kaniko/registry
+  4. /data/uploads
 * Add the following labels to the node with the persistent storage attached in last step
 ```bash
-kubectl label nodes <node-name> air-run-postgres=true
-kubectl label nodes <node-name> air-run-kaniko=true
+kubectl label nodes <node-name> air-run-postgres=Schedule
+kubectl label nodes <node-name> air-run-kaniko=Schedule
 ```
 * Create a persistent volume using
 ```bash
@@ -177,7 +178,17 @@ htpasswd -Bbc pass-file <user-name> <password>
 ```
 
 * Generate docker config secret
-```bash
+```bash  
+kubectl create secret docker-registry kaniko-secret \
+  --dry-run=client \
+  --docker-username=<user-name> \
+  --docker-password=<password> \
+  --docker-server=k8s-registry:80 \
+  --output="jsonpath={.data.\.dockerconfigjson}" \
+  | base64 -d \
+  | { read data; kubectl create secret generic kaniko-secret --from-literal=config.json=$data; }
+  
+  
 kubectl create secret docker-registry regcred \
   --docker-username=<user-name> \
   --docker-password=<password> \

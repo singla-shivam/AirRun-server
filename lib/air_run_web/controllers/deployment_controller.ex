@@ -61,6 +61,7 @@ defmodule AirRunWeb.DeploymentController do
     deployment = Accounts.mark_deployment_built(deployment_id)
     Kubernetes.make_deployment(project_name, deployment_id, deployment.user_id)
     Kubernetes.create_service(project_name, deployment_id, deployment.user_id)
+    Kubernetes.make_poll_job(project_name, deployment_id, deployment.user_id)
 
     send_resp(conn, 202, "")
   end

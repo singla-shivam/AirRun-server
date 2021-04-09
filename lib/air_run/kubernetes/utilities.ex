@@ -15,18 +15,20 @@ defmodule AirRun.Kubernetes.Utilities do
     put_in(config, ["metadata", "labels"], labels)
   end
 
-  def put_selector_labels(config, labels, :service) do
-    labels = sanitize_labels(labels)
-    put_in(config, ["spec", "selector"], labels)
-  end
-
   @doc """
   Puts the labels as selector match labels in the config
   """
   @spec put_selector_labels(t(), labels(), resource_type()) :: t()
-  def put_selector_labels(config, labels, _resource_type) do
+  def put_selector_labels(config, labels, resource_type) do
     labels = sanitize_labels(labels)
-    put_in(config, ["spec", "selector", "matchLabels"], labels)
+
+    path =
+      case resource_type do
+        :service -> ["spec", "selector"]
+        _ -> ["spec", "selector", "matchLabels"]
+      end
+
+    put_in(config, path, labels)
   end
 
   @doc """

@@ -26,7 +26,6 @@ defmodule AirRun.Kubernetes.Deployment do
     |> put_meta_labels(labels, :deployment)
     |> put_selector_labels(labels, :deployment)
     |> put_pod_template_labels(labels, :deployment)
-    |> put_env_value("deployment-poll", "DEPLOYMENT_NAME", deployment_name, :deployment)
     |> put_image_name(registry_address <> "/" <> image_name)
   end
 

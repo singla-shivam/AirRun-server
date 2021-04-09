@@ -106,7 +106,6 @@ defmodule Mix.Tasks.AirRun.Init do
   end
 
   defp deploy_server(server) do
-
   end
 
   defp generate_secret(server, path, step, override? \\ false) do

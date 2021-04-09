@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kaniko
+  labels:
+    label: insert-labels-here
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        label: insert-labels-here
+    spec:
+      restartPolicy: Never
+      volumes:
+        - name: scripts
+          configMap:
+            name: air-run-scripts-configmap
+      containers:
+        - name: deployment-poll
+          image: alpine:3.9
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/sh" ]
+          args:
+            - /scripts/user-deployment-poll.sh
+          env:
+            - name: DEPLOYMENT_NAME
+              value: deployment-name-here
+            - name: SERVICE_ACCOUNT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: air-run-service-account-basic-auth
+            - name: SERVICE_ACCOUNT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: air-run-service-account-basic-auth
+          volumeMounts:
+            - mountPath: /scripts
+              name: scripts
